@@ -22,6 +22,11 @@ namespace CodeArts.Db
         /// </summary>
         string TableName { get; }
 
+        /// <summary>
+        /// 是版本字段。
+        /// </summary>
+        bool IsVersion(string name);
+
 #if NET40
         /// <summary>
         /// 主键。

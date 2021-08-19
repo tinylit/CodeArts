@@ -14,11 +14,6 @@ namespace CodeArts.Db.Lts
     public interface IDbRouteExecuter<TEntity> where TEntity : class, IEntiy
     {
         /// <summary>
-        /// 矫正配置。
-        /// </summary>
-        ISQLCorrectSettings Settings { get; }
-
-        /// <summary>
         /// 开启事务保护，使用数据库默认隔离级别。
         /// <see cref="System.Data.IDbConnection.BeginTransaction()"/>
         /// </summary>
