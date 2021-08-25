@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net461;net451;net45;net40;netstandard2.0;netstandard2.1;</TargetFrameworks>
+		<TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Version>8.1.0.0</Version>
+		<Authors>Tiny Lit</Authors>
+		<Company>Tiny Lit</Company>
+		<Description>An ORM Library Based on dapper.</Description>
+		<PackageLicenseUrl>https://github.com/tinylit/codearts/blob/master/LICENSE.txt</PackageLicenseUrl>
+		<RepositoryUrl>https://github.com/tinylit/codearts</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Copyright>https://github.com/tinylit/codearts/blob/master/LICENSE.txt</Copyright>
+		<PackageIconUrl>https://raw.githubusercontent.com/tinylit/codearts/master/codearts.png</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/tinylit/codearts</PackageProjectUrl>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net40' Or '$(TargetFramework)' == 'net45'">
+		<PackageReference Include="Dapper" Version="1.50.2" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+		<PackageReference Include="Dapper" Version="1.60.6" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
+		<PackageReference Include="Dapper" Version="2.0.78" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\CodeArts.Db\CodeArts.Db.csproj" />
+	</ItemGroup>
+
+</Project>

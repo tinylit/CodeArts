@@ -1,12 +1,19 @@
 ![CodeArts](http://oss.jschar.com/codearts.png 'Logo')
 
+[![Gitee](https://gitee.com/static/images/logo-en.svg)](https://gitee.com/tinylit/codearts)
+[![Github](http://oss.jschar.com/logo_github.png)](https://github.com/tinylit/codearts)
+
 ![GitHub](https://img.shields.io/github/license/tinylit/codearts.svg)
 ![language](https://img.shields.io/github/languages/top/tinylit/codearts.svg)
 ![codeSize](https://img.shields.io/github/languages/code-size/tinylit/codearts.svg)
 ![appveyor-ci](https://img.shields.io/appveyor/ci/tinylit/codearts.svg)
 ![AppVeyor tests (compact)](https://img.shields.io/appveyor/tests/tinylit/codearts.svg?compact_message)
+[![GitHub issues](https://img.shields.io/github/issues-raw/tinylit/codearts)](../../issues)
+
+
 
 ### “CodeArts”是什么？
+
 CodeArts 是一套简单、高效的轻量级框架（涵盖了类型转换、实体复制、实体映射、动态代理类，以及基于Linq分析实现的、支持分表和读写分离的ORM框架）。
 
 ### 如何安装？

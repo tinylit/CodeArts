@@ -91,6 +91,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeArts.Db.Linq2Sql", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeArts.Middleware", "src\CodeArts.Middleware\CodeArts.Middleware.csproj", "{F05FBC01-A93E-45F0-A5D8-6777147F09A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeArts.Db.Dapper", "src\CodeArts.Db.Dapper\CodeArts.Db.Dapper.csproj", "{607046A6-7C4C-48BB-AB54-EAF1021390CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -241,6 +243,10 @@ Global
 		{F05FBC01-A93E-45F0-A5D8-6777147F09A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F05FBC01-A93E-45F0-A5D8-6777147F09A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F05FBC01-A93E-45F0-A5D8-6777147F09A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{607046A6-7C4C-48BB-AB54-EAF1021390CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{607046A6-7C4C-48BB-AB54-EAF1021390CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{607046A6-7C4C-48BB-AB54-EAF1021390CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{607046A6-7C4C-48BB-AB54-EAF1021390CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -282,6 +288,7 @@ Global
 		{03DA8EE8-6AAB-457D-9A3C-536D9BBCD8F6} = {9964966D-390B-47BC-9B60-CAFFCF1381B3}
 		{2ECC9421-A3EE-46A1-BFA7-66DDF37E9BAC} = {9964966D-390B-47BC-9B60-CAFFCF1381B3}
 		{F05FBC01-A93E-45F0-A5D8-6777147F09A8} = {9964966D-390B-47BC-9B60-CAFFCF1381B3}
+		{607046A6-7C4C-48BB-AB54-EAF1021390CA} = {9964966D-390B-47BC-9B60-CAFFCF1381B3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D69380D7-DEA5-4884-85A8-1049025CE2EA}
