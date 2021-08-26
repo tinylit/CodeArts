@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.Logging
         /// <param name="loggerFactory">日志工厂。</param>
         public static void RegisterLogging(Func<ILoggerFactory> loggerFactory) => LoggerManager.loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 
-#if NETCOREAPP3_1
+#if NETSTANDARD2_1_OR_GREATER
         private static ILoggerFactory Factory => factory ??= loggerFactory?.Invoke();
 #else
         private static ILoggerFactory Factory => factory ?? (factory = loggerFactory?.Invoke());

@@ -119,6 +119,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 return true;
             }
 
+            //? 集合获取。
+            if (serviceType.IsGenericType && serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                serviceType = serviceType.GetGenericArguments()[0];
+            }
+
             if (depth >= maxDepth)
             {
                 if (serviceType.IsGenericType)

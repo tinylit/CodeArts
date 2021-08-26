@@ -501,11 +501,6 @@ namespace CodeArts.Net
     public interface IJsonRequestableAsync<T> : IRequestableExtendAsync<T>
     {
         /// <summary>
-        /// 命名规则。
-        /// </summary>
-        NamingType NamingType { get; }
-
-        /// <summary>
         /// 捕获Web异常。
         /// </summary>
         /// <param name="log">记录异常信息。</param>
@@ -1034,11 +1029,6 @@ namespace CodeArts.Net
     /// <typeparam name="T">结果数据。</typeparam>
     public interface IJsonRequestable<T> : IRequestableExtend<T>
     {
-        /// <summary>
-        /// 命名规则。
-        /// </summary>
-        NamingType NamingType { get; }
-
         /// <summary>
         /// 捕获Web异常。
         /// </summary>

@@ -178,8 +178,6 @@ namespace CodeArts.Proxies
 
             bool throwsError = true;
 
-            var constructorInfos = serviceType.GetConstructors();
-
             foreach (var constructorInfo in serviceType.GetConstructors())
             {
                 var parameterInfos = constructorInfo.GetParameters();

@@ -96,6 +96,8 @@ namespace System
 
                     disposedValue = true;
                 }
+
+                GC.SuppressFinalize(this);
             }
             #endregion
         }
@@ -420,15 +422,9 @@ namespace System
             {
                 if (requestableBase is Requestable requestable)
                 {
-                    try
+                    using (var requestableRef = new RequestableRef(requestable))
                     {
-                        requestable.IsNotQueryFix = false;
-
-                        await action.Invoke(requestableBase, webException);
-                    }
-                    finally
-                    {
-                        requestable.IsNotQueryFix = true;
+                        await action.Invoke(requestableRef, webException);
                     }
                 }
                 else
@@ -1609,15 +1605,9 @@ namespace System
             {
                 if (requestableBase is Requestable requestable)
                 {
-                    try
+                    using (var requestableRef = new RequestableRef(requestable))
                     {
-                        requestable.IsNotQueryFix = false;
-
-                        action.Invoke(requestableBase, webException);
-                    }
-                    finally
-                    {
-                        requestable.IsNotQueryFix = true;
+                        action.Invoke(requestableRef, webException);
                     }
                 }
                 else
@@ -2375,6 +2365,82 @@ namespace System
         }
         #endregion
 
+        private class RequestableRef : Requestable
+        {
+            private readonly Requestable requestable;
+
+            public RequestableRef(Requestable requestable) : base(requestable)
+            {
+                this.requestable = requestable;
+            }
+
+            protected override string ConcatQueryString(string originalQueryString, string queryString)
+            {
+                var originalArray = originalQueryString.Split('&');
+
+                var originalDic = new Dictionary<string, string>(originalArray.Length);
+
+                foreach (var arg in originalArray)
+                {
+                    if (arg.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    string key = arg.Split('=')[0];
+
+                    if (originalDic.TryGetValue(key, out string oldValue))
+                    {
+                        originalDic[key] = string.Concat(oldValue, "&", arg);
+                    }
+                    else
+                    {
+                        originalDic[key] = arg;
+                    }
+                }
+
+                var array = queryString.Split('&');
+
+                var dic = new Dictionary<string, string>(array.Length);
+
+                foreach (var arg in array)
+                {
+                    if (arg.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    string key = arg.Split('=')[0];
+
+                    if (dic.TryGetValue(key, out string oldValue))
+                    {
+                        dic[key] = string.Concat(oldValue, "&", arg);
+                    }
+                    else
+                    {
+                        dic[key] = arg;
+                    }
+                }
+
+                foreach (var kv in dic)
+                {
+                    originalDic[kv.Key] = kv.Value;
+                }
+
+                return string.Join("&", originalDic.Select(x => x.Value));
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    requestable.Ref(this);
+                }
+
+                base.Dispose(disposing);
+            }
+        }
+
         private class Requestable : CastRequestable, IRequestable, IDisposableFileRequestable
         {
             private Uri __uri;
@@ -2384,9 +2450,18 @@ namespace System
             private Encoding __encoding;
             private Dictionary<string, string> __headers;
 
-            public bool IsNotQueryFix = true;
+            protected Requestable(Requestable requestable)
+            {
+                __uri = requestable.__uri;
+                __data = requestable.__data;
+                __form = requestable.__form;
+                __headers = requestable.__headers;
+                __encoding = requestable.__encoding;
+                isFormSubmit = requestable.isFormSubmit;
+            }
 
             public Requestable(string uriString) : this(new Uri(uriString)) { }
+
             public Requestable(Uri uri)
             {
                 __uri = uri ?? throw new ArgumentNullException(nameof(uri));
@@ -2434,7 +2509,11 @@ namespace System
             {
                 isFormSubmit = true;
 
+#if NETSTANDARD2_1_OR_GREATER
+                __form ??= new NameValueCollection();
+#else
                 __form = __form ?? new NameValueCollection();
+#endif
 
                 if (namingType == NamingType.Normal)
                 {
@@ -2466,7 +2545,12 @@ namespace System
                     return this;
                 }
 
+
+#if NETSTANDARD2_1_OR_GREATER
+                __form ??= new NameValueCollection();
+#else
                 __form = __form ?? new NameValueCollection();
+#endif
 
                 var typeStore = TypeItem.Get(param.GetType());
 
@@ -2500,7 +2584,11 @@ namespace System
                     return this;
                 }
 
+#if NETSTANDARD2_1_OR_GREATER
+                __form ??= new NameValueCollection();
+#else
                 __form = __form ?? new NameValueCollection();
+#endif
 
                 var typeStore = TypeItem.Get(param.GetType());
 
@@ -2528,6 +2616,22 @@ namespace System
             public IRequestable Json(string param) => Body(param, "application/json");
             public IRequestable Json<T>(T param, NamingType namingType = NamingType.Normal) where T : class
                 => Json(JsonHelper.ToJson(param, namingType));
+
+            public void Ref(RequestableRef requestable)
+            {
+                __uri = requestable.__uri;
+                __data = requestable.__data;
+                __form = requestable.__form;
+                __headers = requestable.__headers;
+                __encoding = requestable.__encoding;
+                isFormSubmit = requestable.isFormSubmit;
+            }
+
+            protected virtual string ConcatQueryString(string originalQueryString, string queryString)
+            {
+                return string.Concat(originalQueryString, "&", queryString);
+            }
+
             public IRequestable AppendQueryString(string param)
             {
                 if (string.IsNullOrEmpty(param))
@@ -2539,73 +2643,33 @@ namespace System
                     .TrimStart('?', '&')
                     .TrimEnd('&');
 
-                if (IsNotQueryFix || __uri.Query.IsEmpty())
+                if (query.Length == 0)
                 {
-                    string uriString = __uri.ToString();
+                    return this;
+                }
 
-                    __uri = new Uri(string.Concat(uriString, uriString.IndexOf('?') == -1 ? "?" : "&", query));
+                string urlStr = __uri.ToString();
+
+                int indexOf = urlStr.IndexOf('?');
+
+                if (indexOf == -1)
+                {
+                    __uri = new Uri(string.Concat(urlStr, "?", query));
 
                     return this;
                 }
-                else
-                {
-                    var dic = new Dictionary<string, string>();
 
-                    foreach (var arg in __uri.Query.Substring(1).Split('&'))
-                    {
-                        if (arg.Length == 0)
-                        {
-                            continue;
-                        }
+#if NETSTANDARD2_1_OR_GREATER
+                string queryString = ConcatQueryString(urlStr[(indexOf + 1)..], query);
 
-                        string key = arg.Split('=').First();
+                __uri = new Uri(string.Concat(urlStr[0..(indexOf + 1)], queryString));
+#else
+                string queryString = ConcatQueryString(urlStr.Substring(indexOf + 1), query);
 
-                        if (dic.TryGetValue(key, out string oldValue))
-                        {
-                            dic[key] = string.Concat(oldValue, "&", arg);
-                        }
-                        else
-                        {
-                            dic[key] = arg;
-                        }
-                    }
+                __uri = new Uri(string.Concat(urlStr.Substring(0, indexOf + 1), queryString));
+#endif
 
-                    var dic2 = new Dictionary<string, string>();
-
-                    foreach (var arg in query.Split('&'))
-                    {
-                        if (arg.Length == 0)
-                        {
-                            continue;
-                        }
-
-                        string key = arg.Split('=').First();
-
-                        if (dic2.TryGetValue(key, out string oldValue))
-                        {
-                            dic2[key] = string.Concat(oldValue, "&", arg);
-                        }
-                        else
-                        {
-                            dic2[key] = arg;
-                        }
-                    }
-
-                    foreach (var kv in dic2)
-                    {
-                        dic[kv.Key] = kv.Value;
-                    }
-
-                    dic2.Clear();
-
-                    string urlStr = __uri.ToString();
-
-                    int indexOf = urlStr.IndexOf('?');
-
-                    __uri = new Uri(string.Concat(urlStr.Substring(0, indexOf + 1), string.Join("&", dic.Select(x => x.Value))));
-
-                    return this;
-                }
+                return this;
             }
             public IRequestable AppendQueryString(string name, string value)
             {
@@ -2662,6 +2726,7 @@ namespace System
 
                 return AppendQueryString(sb.ToString());
             }
+
             public override string RequestImplement(string method, int timeout = 5000)
             {
                 using (var client = new WebCoreClient
